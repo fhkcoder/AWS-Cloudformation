@@ -1,0 +1,46 @@
+Mappings: 
+  AMIRegionMap: 
+    us-east-2: 
+      AMI: ami-07f463d9d4a6f005f
+    us-west-1: 
+      AMI: ami-03392a27e4a01f1e4
+    us-west-2: 
+      AMI: ami-00c257e12d6828491
+
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !FindInMap
+        - AMIRegionMap
+        - !Ref AWS::Region
+        - AMI 
+      Tags:
+        - Key: "Name"
+          Value: !Join
+            - " "
+            - - "My Instance in"
+              - !Ref AWS::Region
+      SecurityGroups:
+        - !Ref VprofileSG
+  
+  VprofileSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow ssh & http from myIp
+      GroupName: VprofileSG
+
+      SecurityGroupIngress: 
+        - Description: Inbound rule for http
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+
+        - Description: Inbound rule for ssh
+          IpProtocol: tcp
+          CidrIp: 223.123.15.49/32
+          FromPort: 22
+          ToPort: 22
+
